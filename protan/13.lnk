@@ -1,0 +1,186 @@
+import random
+import time
+import win32api
+import win32con
+import cv2
+import numpy as np
+from windowcapture import WindowCapture
+
+W = 0x57  # 'W' tuşu
+F = 0x46  # 'F' tuşu
+R = 0x52  # 'R' tuşu
+Z = 0x5A  # 'Z' tuşu
+ONE = 0x31  # '1' tuşu
+
+tarroncamp1_konumx = 784
+tarroncamp1_konumy = 501
+
+siena1_konumx = 784
+siena1_konumy = 584
+
+tp1_konumx = 1293
+tp1_konumy = 1037
+
+
+# Görüntü yakalamak için OpenCV kullanımı
+def find_image_on_screen(image_path, threshold=0.8):
+    # Ekran görüntüsü al
+    screen = np.array(WindowCapture().get_screenshot())
+
+    # Görseli oku ve gri tonlamaya çevir
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+    # Ekran görüntüsünü de gri tonlamaya çevir
+    screen_gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+
+    # Görüntü eşleştirmeyi yap
+    result = cv2.matchTemplate(screen_gray, image, cv2.TM_CCOEFF_NORMED)
+    locations = np.where(result >= threshold)
+
+    # Eşleşen koordinatları döndür
+    locations = list(zip(*locations[::-1]))
+    return locations
+
+
+# Win32 API kullanarak fareyi hareket ettirme ve tıklama işlemi
+def move_mouse(x, y):
+    win32api.SetCursorPos((x, y))
+
+
+def click_mouse(x, y):
+    move_mouse(x, y)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y)
+    time.sleep(0.1)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y)
+
+
+# Tuş basma işlemleri için Win32 API
+def press_key(key, min_delay=0.1, max_delay=0.5):
+    win32api.keybd_event(key, 0, 0, 0)  # WM_KEYDOWN
+    sleep(min_delay=min_delay, max_delay=max_delay)
+    win32api.keybd_event(key, 0, win32con.KEYEVENTF_KEYUP, 0)  # WM_KEYUP
+
+
+# Uyuma fonksiyonu
+def sleep(min_delay=0.1, max_delay=0.5):
+    if min_delay > max_delay:
+        min_delay, max_delay = max_delay, min_delay
+    time.sleep(random.uniform(min_delay, max_delay))
+
+
+# Portal tıklama işlemi
+def portal_tiklama():
+    locations = find_image_on_screen("protean.png")
+    if locations:
+        x, y = locations[0]
+        click_mouse(x + 5, y + 410)
+        sleep(min_delay=0.1, max_delay=0.2)
+        press_key(key=W)
+        sleep(min_delay=2, max_delay=3)
+        press_key(key=F)
+
+
+def proteanbasma():
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+    sleep(min_delay=2.1, max_delay=3.9)
+    click_mouse(tp1_konumx + 0, tp1_konumy - 0)
+
+def tarroncamp_tiklama():
+    click_mouse(tarroncamp1_konumx + 0, tarroncamp1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+
+def tarroncampbasma():
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+    sleep(min_delay=2.1, max_delay=3.9)
+
+    click_mouse(tp1_konumx + 0, tp1_konumy - 0)
+
+def siena_tiklama():
+    click_mouse(siena1_konumx + 0, siena1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+
+def sienabasma():
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+    sleep(min_delay=2.1, max_delay=3.9)
+    click_mouse(tp1_konumx + 0, tp1_konumy - 0)
+
+
+# Diğer tıklama ve basma işlemleri de benzer şekilde aynı mantıkla `win32api` ve OpenCV ile yapılabilir.
+# ...
+
+
+def kasmabaslasin():
+    proteanbasma()
+    sleep(min_delay=0.1, max_delay=0.2)
+    portal_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    tarroncamp_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    tarroncampbasma()
+    sleep(min_delay=0.1, max_delay=0.2)
+    portal_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    siena_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    sienabasma()
+    sleep(min_delay=0.1, max_delay=0.2)
+
+
+while True:
+    try:
+        kasmabaslasin()
+        sleep(min_delay=0.1, max_delay=0.2)
+    except KeyboardInterrupt:
+        print("Program kullanıcı tarafından kesildi.")
+        break
+    except Exception as e:
+        print(f"Error: {e}")
+        pass

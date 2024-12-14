@@ -1,0 +1,760 @@
+import os
+import random
+import time
+from datetime import datetime, timedelta
+from threading import Thread, Event as ThreadEvent
+
+import cv2
+
+import win32api
+import win32con
+import win32gui
+
+import numpy as np
+
+import keyboard_detector
+from admin_privileges import running_as_admin
+from device_validation import DeviceValidation
+from windowcapture import WindowCapture
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# Disabled mac validation for the public release.
+registered_devices = ['00-FF-28-13-F5-8D', '08-BF-B8-BC-1E-6D']
+
+device_registration = DeviceValidation(registered_devices)
+running_as_admin()
+
+keyboard_monitor = keyboard_detector.KeyboardDetector()
+keyboard_monitor.start()
+
+window_name = 'Rise Online Client'
+window = WindowCapture(window_name=window_name)
+hwnd = window.get_hwnd()
+
+W = 0x57  # 'W' tuşu
+F = 0x46  # 'F' tuşu
+R = 0x52  # 'R' tuşu
+Z = 0x5A  # 'Z' tuşu
+ONE = 0x31  # '1' tuşu
+NiNE = 0x39 # '9' tuşu
+
+
+tarr
+oncamp1_konumx = 784
+tarroncamp1_konumy = 501
+
+siena1_konumx = 784
+siena1_konumy = 584
+
+tp1_konumx = 1293
+tp1_konumy = 1037
+
+current_camp = 1
+loading_screen_duration = 26 + 5  # 5 seconds for character flashing
+next_camp_change_timedelta = 180000
+next_camp_change = datetime.now() + timedelta(seconds=next_camp_change_timedelta)
+
+def find_image_on_screen(image_path, threshold=0.5):
+    screen = np.array(WindowCapture().get_screenshot())  # Ekran görüntüsü al
+
+    # Görseli oku ve gri tonlamaya çevir
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    screen_gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)  # Ekran görüntüsünü griye çevir
+
+    result = cv2.matchTemplate(screen_gray, image, cv2.TM_CCOEFF_NORMED)
+    locations = np.where(result >= threshold)  # Görüntü eşleşmesini kontrol et
+    locations = list(zip(*locations[::-1]))  # Eşleşen yerleri döndür
+    return locations
+
+
+def sleep(min_delay=0.1, max_delay=0.5):
+    if min_delay > max_delay:
+        min_delay, max_delay = max_delay, min_delay
+
+    time.sleep(random.uniform(min_delay, max_delay))
+
+
+def press_key(key, min_delay=0.1, max_delay=0.5):
+    win32api.SendMessage(hwnd, win32con.WM_KEYDOWN, key, 0)
+    sleep(min_delay=min_delay, max_delay=max_delay)
+    win32api.SendMessage(hwnd, win32con.WM_KEYUP, key, 0)
+
+
+def mouse_click(target_x=None, target_y=None, times=1):
+    if target_x is None or target_y is None:
+        raise ValueError("Both x and y must be provided.")
+
+    rect = win32gui.GetWindowRect(hwnd)
+    win_x, win_y, _, _ = rect
+
+    rel_target_x = target_x + win_x
+    rel_target_y = target_y + win_y
+
+    win32api.SetCursorPos((rel_target_x, rel_target_y))
+    sleep(min_delay=0.1, max_delay=0.4)
+
+    for i in range(times):
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+        sleep(min_delay=0.1, max_delay=0.4)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+
+
+def portal_tiklama():
+    # Görsel listesi (Farklı görselleri burada ekleyebilirsiniz)
+    image_paths = ["1.png", "2.png", "3.png", "4.png", "5.png", "6.png", "7.png", "8.png", "9.png", "10.png", "11.png", "12.png", "13.png", "14.png", "15.png"]
+
+    # Görselleri bulana kadar sürekli dene
+    while True:
+        for image_path in image_paths:
+            locations = find_image_on_screen(image_path)
+            if locations:
+                # Görsel bulundu, tıklama işlemini yap
+                x, y = locations[0]
+                mouse_click(x + 0, y + 300)  # Görselin üzerine tıklama
+                sleep(min_delay=7.1, max_delay=7.9)  # Bir süre bekle
+                press_key(key=W)  # 'W' tuşuna bas
+                sleep(min_delay=0.1, max_delay=0.5)
+                press_key(key=W)  # 'W' tuşuna bas
+                sleep(min_delay=0.1, max_delay=0.4)
+                press_key(key=F)  # 'F' tuşuna bas
+                sleep(min_delay=0.1, max_delay=0.5)
+                press_key(key=F)  # 'F' tuşuna bas
+                sleep(min_delay=0.1, max_delay=0.5)
+                return  # İşlem tamamlandığında döngüden çık
+        # Görsel bulunamadı, tekrar dene
+        print("Hiçbir görsel bulunamadı, tekrar deneniyor...")
+        sleep(min_delay=0.5, max_delay=1)  # Kısa bir bekleme süresi sonra tekrar dene
+
+
+
+#
+def tarroncamp_kordinat():
+    return 784, 501  # Fixed x, y for 1920x1080, because I am tired of integrating OpenCV.
+
+def tarroncamp_click():
+    x, y = tarroncamp_kordinat()
+
+    mouse_click(target_x=x, target_y=y)
+
+
+#
+def siena_kordinat():
+    return 784, 584  # Fixed x, y for 1920x1080, because I am tired of integrating OpenCV.
+
+def siena_click():
+    x, y = siena_kordinat()
+
+    mouse_click(target_x=x, target_y=y)
+
+
+#
+def tp_kordinat():
+    return 1293, 1037  # Fixed x, y for 1920x1080, because I am tired of integrating OpenCV.
+
+
+def tp_click():
+    x, y = tp_kordinat()
+
+    mouse_click(target_x=x, target_y=y)
+
+
+def kabul_kordinat():
+    return 1060, 746  # Fixed x, y for 1920x1080, because I am tired of integrating OpenCV.
+
+
+def kabul_click():
+    x, y = kabul_kordinat()
+
+    mouse_click(target_x=x, target_y=y)
+
+
+#
+def get_camp_header():
+    return 1293, 1037  # Fixed x, y for 1920x1080, because I am tired of integrating OpenCV.
+
+
+def click_camp_header():
+    x, y = get_camp_header()
+
+    mouse_click(target_x=x, target_y=y)
+
+
+def click_next_camp():
+    click_x, click_y = get_camp_header()
+
+    _current_camp = 1 if current_camp == max_camp else current_camp
+
+    next_camp_y = click_y + (1 * _current_camp)
+
+    mouse_click(target_x=click_x, target_y=next_camp_y, times=3)
+
+
+
+def run_bot(_max_camp):
+    global next_camp_change, current_camp
+
+    if datetime.now() >= next_camp_change:
+        click_camp_header()
+        sleep(min_delay=0.1, max_delay=0.2)
+        click_next_camp()
+
+        time.sleep(loading_screen_duration)
+
+        next_camp_change = datetime.now() + timedelta(seconds=next_camp_change_timedelta)
+        sleep(min_delay=7, max_delay=7.9)
+        press_key(key=NiNE)
+
+
+        if current_camp >= max_camp:
+            current_camp = 1
+        else:
+            current_camp += 1
+    else:
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+
+        tp_click()
+        sleep(min_delay=0.1, max_delay=0.9)
+        portal_tiklama()
+        sleep(min_delay=0.1, max_delay=0.9)
+        tarroncamp_click()
+        sleep(min_delay=1.1, max_delay=1.9)
+        kabul_click()
+        sleep(min_delay=3, max_delay=3.9)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+
+
+        tp_click()
+        sleep(min_delay=0.1, max_delay=0.9)
+        portal_tiklama()
+        sleep(min_delay=0.1, max_delay=0.9)
+        siena_click()
+        sleep(min_delay=1.1, max_delay=1.9)
+        kabul_click()
+        sleep(min_delay=3.1, max_delay=3.9)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=0.1, max_delay=0.5)
+
+        press_key(key=Z)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=R)
+        sleep(min_delay=0.1, max_delay=0.4)
+        press_key(key=ONE)
+        sleep(min_delay=4.1, max_delay=4.9)
+
+        tp_click()
+        sleep(min_delay=5.1, max_delay=5.9)
+
+
+
+
+
+
+def run_thread(_pause_event, _max_camp):
+    while True:
+        if keyboard_monitor.get_combination_active():
+            _pause_event.set()
+        else:
+            if _pause_event.is_set():
+                _pause_event.clear()
+
+            run_bot(_max_camp)
+
+
+if __name__ == '__main__':
+    # print('Set the resolution windowed 1920x1080')
+    # print("If you haven't set the resolution yet, close the program and try again.")
+    # print('To pause/resume the bot, simultaneously press RIGHT CTRL and RIGHT ALT.')
+    # print('The bot begins in 3 seconds')
+
+    print('1920x1080 pencere modunda ayarla oyunu')
+    print('Henuz cozunurlugu ayarlamadiysan, programi kapatip tekrar ac')
+    print('Duraklatmak/devam ettirmek icin SAG CTRL ve SAG ALT tuslarina aynanda bas')
+    print('Bot 3 saniye icinde basliyor')
+    time.sleep(3)
+
+    win32gui.SetForegroundWindow(hwnd)
+    max_camp = 3
+    pause_event = ThreadEvent()
+    thread = Thread(target=run_thread, args=(pause_event, max_camp,))
+    thread.start()

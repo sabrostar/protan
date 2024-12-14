@@ -1,0 +1,191 @@
+from python_imagesearch import imagesearch
+import pyautogui
+
+
+import random
+import time
+
+
+import win32api
+import win32con
+
+
+import keyboard_detector
+
+from windowcapture import WindowCapture
+
+keyboard_monitor = keyboard_detector.KeyboardDetector()
+keyboard_monitor.start()
+
+
+
+w = 0x57
+f = 0x46
+R = 0x52
+Z = 0x5A
+ONE = 0x31
+
+
+protan_1 = imagesearch.imagesearch("protean.png")
+
+protan1_x = protan_1[0]
+protan1_y = protan_1[1]
+
+tarroncamp1_konumx = 784
+tarroncamp1_konumy = 501
+
+siena1_konumx = 784
+siena1_konumy = 584
+
+tp1_konumx = 1293
+tp1_konumy = 1037
+
+
+
+
+def sleep(min_delay=0.1, max_delay=0.5):
+    if min_delay > max_delay:
+        min_delay, max_delay = max_delay, min_delay
+    time.sleep(random.uniform(min_delay, max_delay))
+
+def press_key(key, min_delay=0.1, max_delay=0.5):
+    win32api.SendMessage(hwnd, win32con.WM_KEYDOWN, key, 0)
+    sleep(min_delay=min_delay, max_delay=max_delay)
+    win32api.SendMessage(hwnd, win32con.WM_KEYUP, key, 0)
+
+
+
+def portal_tiklama():
+    pyautogui.moveTo(protan1_x + 5, protan1_y + 410)
+    sleep(min_delay=0.1, max_delay=0.2)
+    pyautogui.click(protan1_x + 5, protan1_y + 410)
+    sleep(min_delay=0.1, max_delay=0.2)
+    press_key(key=w)
+    sleep(min_delay=2, max_delay=3)
+    press_key(key=f)
+
+
+def proteanbasma():
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+    sleep(min_delay=2.1, max_delay=3.9)
+
+    pyautogui.moveTo(tp1_konumx + 0, tp1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+    pyautogui.click(tp1_konumx + 0, tp1_konumy - 0)
+
+
+def tarroncamp_tiklama():
+    pyautogui.moveTo(tarroncamp1_konumx + 0, tarroncamp1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+    pyautogui.click(tarroncamp1_konumx + 0, tarroncamp1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+
+def tarroncampbasma():
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+    sleep(min_delay=2.1, max_delay=3.9)
+
+    pyautogui.moveTo(tp1_konumx + 0, tp1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+    pyautogui.click(tp1_konumx + 0, tp1_konumy - 0)
+
+
+def siena_tiklama():
+    pyautogui.moveTo(siena1_konumx + 0, siena1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+    pyautogui.click(siena1_konumx + 0, siena1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+
+
+def sienabasma():
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+
+    press_key(key=Z)
+    sleep(min_delay=0.1, max_delay=0.3)
+    press_key(key=R)
+    sleep(min_delay=0.2, max_delay=0.3)
+    press_key(key=ONE)
+    sleep(min_delay=2.1, max_delay=3.9)
+
+    pyautogui.moveTo(tp1_konumx + 0, tp1_konumy - 0)
+    sleep(min_delay=0.1, max_delay=0.2)
+    pyautogui.click(tp1_konumx + 0, tp1_konumy - 0)
+
+
+def kasmabaslasin():
+    proteanbasma()
+    sleep(min_delay=0.1, max_delay=0.2)
+    portal_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    tarroncamp_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    tarroncampbasma()
+    sleep(min_delay=0.1, max_delay=0.2)
+    portal_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    siena_tiklama()
+    sleep(min_delay=0.1, max_delay=0.2)
+    sienabasma()
+    sleep(min_delay=0.1, max_delay=0.2)
+
+    
+
+
+while True:
+    try:
+        kasmabaslasin()
+        sleep(min_delay=0.1, max_delay=0.2)
+
+
+
+    except:
+        pass
+
+
+
+
+
+
+
+
